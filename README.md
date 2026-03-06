@@ -1,55 +1,111 @@
-# BrickX - Real Estate Investment Platform
+# PropickX — Fractional Real Estate Investment Platform
 
-![BrickX Platform](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=2070&ixlib=rb-4.0.3)
+![PropickX Banner](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=2070)
 
-**Live Demo:** [http://typical-country.surge.sh](http://typical-country.surge.sh)
+**🌐 Live Demo:** [https://neavdak.github.io/newsite](https://neavdak.github.io/newsite)
+
+---
 
 ## 🏠 Overview
 
-BrickX is a modern real estate investment platform that allows users to invest in premium properties with ease. Built with React and tailored for a seamless mobile experience, it features a robust dashboard, an AI investment advisor, and a comprehensive marketplace.
+**PropickX** is a premium, mobile-first fractional real estate investment platform. Investors can buy fractions of high-yield properties, track portfolio performance, participate in IPO-style property launches, trade on a secondary market, and receive AI-driven investment advice — all secured with military-grade encryption.
+
+---
 
 ## 🚀 Key Features
 
-*   **📈 Dashboard**: Track your portfolio performance, view distinct assets, and monitor transaction history.
-*   **🏙️ Marketplace**: Browse high-yield properties, filter by category, and invest in fractions.
-*   **🤖 AI Advisor**: Get personalized investment advice from our smart AI assistant.
-*   **🔐 Authentication**: Secure login and signup flows with user profile management.
-*   **📱 Mobile-First**: Fully optimized for mobile devices with a native app-like feel (PWA support).
-*   **📄 Documents Center**: Access key property documents (PDFs) directly from property details.
-*   **⚙️ Admin Portal**: Manage users and properties (accessible to admins).
+### 💼 Investment Core
+- **Fractional Share Buying** — invest from ₹1 in any listed property
+- **IPO-Style Listings** — apply for new property launches with countdown timers
+- **Secondary Market** — buy & sell shares between investors in real time
+- **Portfolio Dashboard** — track P&L, gains, invested value, and rental yield
 
-## 🧪 How to Test
+### 🔐 Security & Certificates
+- **AES-256-GCM Encrypted Certificate IDs** — ownership certificates use PBKDF2-derived keys so each certificate ID is unique per investor but deterministic (always the same for the same investor/property pair)
+- **RSA-PSS 2048-bit Digital Signatures** — every certificate is cryptographically signed, with a compact AES seal code and RSA key fingerprint shown on-screen
+- **Web Crypto API** — zero external crypto dependencies, runs entirely in the browser
 
-To explore the full functionality of the platform, use the following demo credentials:
+### 🤖 AI & Advisory
+- **AI Investment Advisor** — personalized property recommendations powered by a built-in assistant
+- **Rental Calculator** — multi-year ROI projections with comparison charts
 
-*   **Email**: `demo@example.com`
-*   **Password**: `password` (or any password > 6 chars)
+### 💳 Wallet & Transactions
+- **Built-in Wallet** — deposit funds and invest instantly
+- **Transaction History** — complete audit trail of all buys, sells, and deposits
 
-### Steps to Try:
-1.  **Sign In**: Use the credentials above to access your private dashboard.
-2.  **Ask the Advisor**: Go to the "Advisor" tab and ask "What is a good safe investment?".
-3.  **Invest**: Go to the Marketplace, pick a property, and click "Buy Shares".
-4.  **Admin Access**: Click your profile avatar -> "Admin Portal".
+### 📱 UX & Design
+- **Dark glassmorphism UI** — deep navy + electric violet premium design
+- **Framer Motion animations** — smooth micro-animations throughout
+- **Mobile-First / PWA** — app-like experience on all devices
+- **Bottom navigation** — Groww-style intuitive tab bar
+
+### 🛠️ Admin
+- **Admin Portal** — manage users, properties, and listings
+- **Watchlist** — save and track favourite properties
+
+---
+
+## 🧪 Demo Credentials
+
+| Field    | Value                     |
+|----------|---------------------------|
+| Email    | `demo@example.com`        |
+| Password | any password (≥ 6 chars)  |
+
+### Quick walkthrough
+1. **Sign In** → Dashboard loads with your portfolio
+2. **Marketplace** → Pick a property → Buy Shares
+3. **Dashboard** → View certificate (unique encrypted ID generated on first open)
+4. **Advisor tab** → Ask "What is the safest high-yield property?"
+5. **Profile avatar** → Admin Portal
+
+---
 
 ## 🛠️ Tech Stack
 
-*   **Frontend**: React, Vite
-*   **Styling**: Tailwind CSS
-*   **Animation**: Framer Motion
-*   **Icons**: Lucide React
-*   **Routing**: React Router DOM
+| Layer | Technology |
+|---|---|
+| Frontend | React 19, Vite 7 |
+| Styling | Tailwind CSS v4 |
+| Animation | Framer Motion |
+| Icons | Lucide React |
+| Routing | React Router DOM v7 |
+| Crypto | Web Crypto API (AES-256-GCM + RSA-PSS 2048) |
+| State | React Context + localStorage |
+| Deploy | GitHub Actions → GitHub Pages |
 
-## 💻 Local Installation
+---
 
-If you want to run this project locally:
+## 💻 Local Development
 
 ```bash
-# 1. Clone the repository
-git clone <repository-url>
+# 1. Clone
+git clone https://github.com/neavdak/newsite.git
+cd newsite
 
 # 2. Install dependencies
 npm install
 
-# 3. Start the development server
+# 3. Run dev server
 npm run dev
 ```
+
+Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+---
+
+## 🚢 Deployment
+
+This repo auto-deploys to **GitHub Pages** on every push to `main` via GitHub Actions.
+
+To deploy manually:
+```bash
+npm run build      # outputs to /dist
+# then push — the CI workflow handles the rest
+```
+
+---
+
+## 📜 License
+
+MIT © PropickX
