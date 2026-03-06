@@ -22,7 +22,7 @@ import Wallet from './pages/Wallet';
 function App() {
   return (
     <AppProvider>
-      <Router>
+      <Router basename="/newsite">
         <Layout>
           <Routes>
             <Route path="/" element={<Home />} />
