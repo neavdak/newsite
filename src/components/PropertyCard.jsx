@@ -1,9 +1,20 @@
 import { motion } from 'framer-motion';
-import { ArrowUpRight, ArrowDownRight, MapPin } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, MapPin, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useApp } from '../context/AppContext';
 
 export default function PropertyCard({ property }) {
     const isPositive = property.change >= 0;
+    const { toggleWatchlist, isInWatchlist, portfolio } = useApp();
+
+    const isOwned = portfolio.some(p => p.propertyId === property.id);
+    const isFavorited = isInWatchlist(property.id);
+
+    const handleToggleWatchlist = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleWatchlist(property.id);
+    };
 
     return (
         <motion.div
@@ -21,9 +32,24 @@ export default function PropertyCard({ property }) {
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                 </Link>
-                <div className="absolute top-2 right-2 bg-slate-900/80 backdrop-blur text-xs font-bold px-2 py-1 rounded text-white">
-                    {property.type}
+                <div className="absolute top-2 right-2 flex gap-2">
+                    <div className="bg-slate-900/80 backdrop-blur text-xs font-bold px-2 py-1 rounded text-white">
+                        {property.type}
+                    </div>
+                    {isOwned && (
+                        <div className="bg-secondary/90 backdrop-blur text-xs font-bold px-2 py-1 rounded text-slate-900">
+                            Owned
+                        </div>
+                    )}
                 </div>
+                <button
+                    onClick={handleToggleWatchlist}
+                    className="absolute top-2 left-2 bg-slate-900/80 backdrop-blur p-2 rounded-full hover:bg-slate-800 transition-colors"
+                >
+                    <Heart
+                        className={`h-4 w-4 transition-colors ${isFavorited ? 'fill-red-500 text-red-500' : 'text-white'}`}
+                    />
+                </button>
             </div>
 
             <div className="p-4 space-y-3">

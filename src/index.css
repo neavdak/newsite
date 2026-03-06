@@ -1,15 +1,18 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 @theme {
-  --color-background: #0f172a;
-  --color-surface: #1e293b;
-  --color-primary: #f59e0b;
+  /* PropickX Premium Dark Theme */
+  --color-background: #080c14;
+  --color-surface: #0f1623;
+  --color-primary: #7C3AED;
   --color-secondary: #10b981;
-  --color-accent: #fbbf24;
-  --color-text-primary: #f8fafc;
-  --color-text-secondary: #94a3b8;
+  --color-accent: #a78bfa;
+  --color-text-primary: #f0f4ff;
+  --color-text-secondary: #8892a4;
 
-  --font-sans: Inter, sans-serif;
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
 }
 
 body {
@@ -37,4 +40,9 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background-color: #334155;
   /* slate-700 approximation */
+}
+
+/* Safe Area Utility */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
 }

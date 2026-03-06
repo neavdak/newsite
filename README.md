@@ -1,16 +1,55 @@
-# React + Vite
+# BrickX - Real Estate Investment Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![BrickX Platform](https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=2070&ixlib=rb-4.0.3)
 
-Currently, two official plugins are available:
+**Live Demo:** [http://typical-country.surge.sh](http://typical-country.surge.sh)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🏠 Overview
 
-## React Compiler
+BrickX is a modern real estate investment platform that allows users to invest in premium properties with ease. Built with React and tailored for a seamless mobile experience, it features a robust dashboard, an AI investment advisor, and a comprehensive marketplace.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🚀 Key Features
 
-## Expanding the ESLint configuration
+*   **📈 Dashboard**: Track your portfolio performance, view distinct assets, and monitor transaction history.
+*   **🏙️ Marketplace**: Browse high-yield properties, filter by category, and invest in fractions.
+*   **🤖 AI Advisor**: Get personalized investment advice from our smart AI assistant.
+*   **🔐 Authentication**: Secure login and signup flows with user profile management.
+*   **📱 Mobile-First**: Fully optimized for mobile devices with a native app-like feel (PWA support).
+*   **📄 Documents Center**: Access key property documents (PDFs) directly from property details.
+*   **⚙️ Admin Portal**: Manage users and properties (accessible to admins).
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🧪 How to Test
+
+To explore the full functionality of the platform, use the following demo credentials:
+
+*   **Email**: `demo@example.com`
+*   **Password**: `password` (or any password > 6 chars)
+
+### Steps to Try:
+1.  **Sign In**: Use the credentials above to access your private dashboard.
+2.  **Ask the Advisor**: Go to the "Advisor" tab and ask "What is a good safe investment?".
+3.  **Invest**: Go to the Marketplace, pick a property, and click "Buy Shares".
+4.  **Admin Access**: Click your profile avatar -> "Admin Portal".
+
+## 🛠️ Tech Stack
+
+*   **Frontend**: React, Vite
+*   **Styling**: Tailwind CSS
+*   **Animation**: Framer Motion
+*   **Icons**: Lucide React
+*   **Routing**: React Router DOM
+
+## 💻 Local Installation
+
+If you want to run this project locally:
+
+```bash
+# 1. Clone the repository
+git clone <repository-url>
+
+# 2. Install dependencies
+npm install
+
+# 3. Start the development server
+npm run dev
+```
