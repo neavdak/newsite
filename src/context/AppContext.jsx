@@ -36,16 +36,16 @@ export function AppProvider({ children }) {
     const [user, setUser] = useLocalStorage('brickx_user', null);
 
     // Auth methods
-    const login = (email, password) => {
+    const login = (email, password, isAdmin = false) => {
         if (!email || !password) return false;
 
         const mockUser = {
-            id: 'u1',
-            name: 'Demo User',
+            id: isAdmin ? 'admin-1' : 'u1',
+            name: isAdmin ? 'Admin' : 'Demo User',
             email: email,
             avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
             joinedDate: new Date().toISOString(),
-            isAdmin: true
+            isAdmin: isAdmin,
         };
 
         setUser(mockUser);

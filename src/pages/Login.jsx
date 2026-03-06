@@ -1,182 +1,166 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { Building2, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Building2, Mail, Lock, ArrowRight, Loader2, Shield, User } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const ADMIN_EMAIL = 'admin@propickx.com';
+const ADMIN_PASSWORD = 'admin123';
 
 export default function Login() {
+    const [isAdmin, setIsAdmin] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [adminCode, setAdminCode] = useState('');
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const { login } = useApp();
     const navigate = useNavigate();
     const location = useLocation();
 
-    const from = location.state?.from?.pathname || '/dashboard';
+    const from = location.state?.from?.pathname || (isAdmin ? '/admin' : '/dashboard');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
         setLoading(true);
 
-        // Simulate network delay
         setTimeout(() => {
-            const success = login(email, password);
-            if (success) {
-                navigate(from, { replace: true });
+            if (isAdmin) {
+                if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+                    login(email, password, true);
+                    navigate('/admin', { replace: true });
+                } else {
+                    setError('Invalid admin credentials.');
+                }
+            } else {
+                const success = login(email, password);
+                if (success) navigate(from, { replace: true });
+                else setError('Invalid email or password.');
             }
             setLoading(false);
-        }, 1500);
+        }, 1200);
     };
 
     return (
-        <div className="min-h-screen pt-20 pb-12 flex flex-col justify-center sm:px-6 lg:px-8 bg-background">
+        <div className="min-h-screen pt-20 pb-12 flex flex-col justify-center px-4 sm:px-6 lg:px-8 bg-background">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <Link to="/" className="flex justify-center items-center group mb-6">
-                    <div className="bg-gradient-to-br from-primary to-accent p-2 rounded-lg group-hover:shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-shadow mr-2">
+                    <div className="bg-gradient-to-br from-primary to-accent p-2 rounded-lg mr-2">
                         <Building2 className="h-6 w-6 text-background" />
                     </div>
                     <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-                        BrickX
+                        PropickX
                     </span>
                 </Link>
-                <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
-                    Sign in to your account
+
+                {/* Mode Toggle */}
+                <div className="flex bg-surface border border-slate-700 rounded-xl p-1 mb-6 mx-auto max-w-xs">
+                    <button
+                        onClick={() => { setIsAdmin(false); setError(''); }}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all ${!isAdmin ? 'bg-primary text-slate-900 shadow' : 'text-text-secondary hover:text-white'}`}
+                    >
+                        <User className="h-4 w-4" /> Investor
+                    </button>
+                    <button
+                        onClick={() => { setIsAdmin(true); setError(''); }}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all ${isAdmin ? 'bg-accent text-slate-900 shadow' : 'text-text-secondary hover:text-white'}`}
+                    >
+                        <Shield className="h-4 w-4" /> Admin
+                    </button>
+                </div>
+
+                <h2 className="text-center text-2xl font-extrabold text-white mb-1">
+                    {isAdmin ? 'Admin Sign In' : 'Sign in to your account'}
                 </h2>
-                <p className="mt-2 text-center text-sm text-text-secondary">
-                    Or{' '}
-                    <Link to="/signup" className="font-medium text-primary hover:text-accent transition-colors">
-                        create a new account
-                    </Link>
-                </p>
+                {!isAdmin && (
+                    <p className="text-center text-sm text-text-secondary mb-2">
+                        Or{' '}
+                        <Link to="/signup" className="font-medium text-primary hover:text-accent transition-colors">
+                            create a new account
+                        </Link>
+                    </p>
+                )}
+                {isAdmin && (
+                    <p className="text-center text-xs text-text-secondary mb-2">
+                        Use <span className="text-accent font-mono">{ADMIN_EMAIL}</span> / <span className="font-mono text-accent">{ADMIN_PASSWORD}</span>
+                    </p>
+                )}
             </div>
 
-            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
+            <div className="mt-4 sm:mx-auto sm:w-full sm:max-w-md">
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    key={isAdmin ? 'admin' : 'user'}
+                    initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-surface py-8 px-4 shadow-2xl rounded-2xl sm:px-10 border border-slate-700"
+                    className={`py-8 px-6 shadow-2xl rounded-2xl border ${isAdmin ? 'bg-amber-950/20 border-accent/30' : 'bg-surface border-slate-700'}`}
                 >
-                    <form className="space-y-6" onSubmit={handleSubmit}>
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-text-secondary">
-                                Email address
-                            </label>
-                            <div className="mt-1 relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Mail className="h-5 w-5 text-slate-500" />
-                                </div>
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    autoComplete="email"
-                                    required
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="appearance-none block w-full pl-10 pr-3 py-3 border border-slate-600 rounded-lg bg-slate-900/50 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition-colors"
-                                    placeholder="you@example.com"
-                                />
-                            </div>
+                    {isAdmin && (
+                        <div className="flex items-center gap-2 mb-4 bg-accent/10 border border-accent/20 rounded-xl px-4 py-2">
+                            <Shield className="h-4 w-4 text-accent flex-shrink-0" />
+                            <p className="text-xs text-accent font-medium">Restricted access — Admin Portal only</p>
                         </div>
+                    )}
 
-                        <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-text-secondary">
-                                Password
-                            </label>
-                            <div className="mt-1 relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Lock className="h-5 w-5 text-slate-500" />
-                                </div>
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    autoComplete="current-password"
-                                    required
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="appearance-none block w-full pl-10 pr-3 py-3 border border-slate-600 rounded-lg bg-slate-900/50 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm transition-colors"
-                                    placeholder="••••••••"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                                <input
-                                    id="remember-me"
-                                    name="remember-me"
-                                    type="checkbox"
-                                    className="h-4 w-4 text-primary focus:ring-primary border-slate-600 rounded bg-slate-900"
-                                />
-                                <label htmlFor="remember-me" className="ml-2 block text-sm text-text-secondary">
-                                    Remember me
-                                </label>
-                            </div>
-
-                            <div className="text-sm">
-                                <a href="#" className="font-medium text-primary hover:text-accent">
-                                    Forgot your password?
-                                </a>
-                            </div>
-                        </div>
-
-                        <div>
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-slate-900 bg-primary hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    <AnimatePresence>
+                        {error && (
+                            <motion.p
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2 mb-4"
                             >
-                                {loading ? (
-                                    <Loader2 className="h-5 w-5 animate-spin" />
-                                ) : (
-                                    <>
-                                        Sign in
-                                        <ArrowRight className="ml-2 h-5 w-5 text-slate-900" />
-                                    </>
-                                )}
-                            </button>
+                                {error}
+                            </motion.p>
+                        )}
+                    </AnimatePresence>
+
+                    <form className="space-y-5" onSubmit={handleSubmit}>
+                        <div>
+                            <label className="block text-sm font-medium text-text-secondary mb-1">Email address</label>
+                            <div className="relative">
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
+                                <input
+                                    type="email" required
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
+                                    placeholder={isAdmin ? ADMIN_EMAIL : 'you@example.com'}
+                                    className="w-full pl-10 pr-4 py-3 border border-slate-600 rounded-lg bg-slate-900/50 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                                />
+                            </div>
                         </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-text-secondary mb-1">Password</label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
+                                <input
+                                    type="password" required
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                    placeholder="••••••••"
+                                    className="w-full pl-10 pr-4 py-3 border border-slate-600 rounded-lg bg-slate-900/50 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                                />
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className={`w-full flex justify-center items-center gap-2 py-3 rounded-lg font-bold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${isAdmin ? 'bg-accent hover:bg-yellow-400 text-slate-900' : 'bg-primary hover:bg-accent text-slate-900'}`}
+                        >
+                            {loading
+                                ? <Loader2 className="h-5 w-5 animate-spin" />
+                                : <>{isAdmin ? 'Access Admin Portal' : 'Sign In'} <ArrowRight className="h-4 w-4" /></>
+                            }
+                        </button>
                     </form>
 
-                    <div className="mt-6">
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-slate-600" />
-                            </div>
-                            <div className="relative flex justify-center text-sm">
-                                <span className="px-2 bg-surface text-text-secondary">
-                                    Or continue with
-                                </span>
-                            </div>
+                    {!isAdmin && (
+                        <div className="mt-6 text-center">
+                            <p className="text-xs text-text-secondary">Demo: any email + any password ≥ 6 chars</p>
                         </div>
-
-                        <div className="mt-6 grid grid-cols-2 gap-3">
-                            <div>
-                                <a
-                                    href="#"
-                                    className="w-full inline-flex justify-center py-2 px-4 border border-slate-600 rounded-lg shadow-sm bg-slate-800 text-sm font-medium text-white hover:bg-slate-700 transition-colors"
-                                >
-                                    <span className="sr-only">Sign in with Google</span>
-                                    <svg className="h-5 w-5" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
-                                    </svg>
-                                </a>
-                            </div>
-
-                            <div>
-                                <a
-                                    href="#"
-                                    className="w-full inline-flex justify-center py-2 px-4 border border-slate-600 rounded-lg shadow-sm bg-slate-800 text-sm font-medium text-white hover:bg-slate-700 transition-colors"
-                                >
-                                    <span className="sr-only">Sign in with GitHub</span>
-                                    <svg className="h-5 w-5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clipRule="evenodd" />
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                    )}
                 </motion.div>
             </div>
         </div>
