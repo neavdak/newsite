@@ -4,34 +4,29 @@ import { useApp } from '../context/AppContext';
 import { PROPERTIES } from '../data/properties';
 import { formatCurrency } from '../utils/helpers';
 import { generateCertificateId, formatSealCode } from '../utils/certCrypto';
-import { Award, Download, ShieldCheck, Building2, Calendar, Hash, ArrowLeft, Printer, Lock, KeyRound } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Award, ShieldCheck, Building2, Calendar, Hash, ArrowLeft, Download, Lock, KeyRound, Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function Certificate() {
     const { propertyId } = useParams();
     const { user, portfolio } = useApp();
+    const certRef = useRef(null);
 
     const property = PROPERTIES.find(p => p.id === propertyId);
     const holding = portfolio.find(p => p.propertyId === propertyId);
 
-    // Crypto state
     const [certData, setCertData] = useState(null);
     const [cryptoLoading, setCryptoLoading] = useState(true);
+    const [downloading, setDownloading] = useState(false);
 
     useEffect(() => {
         if (!user?.id || !property) return;
-
         setCryptoLoading(true);
         const propCode = property.id.split('-')[1]?.toUpperCase() || 'PROP';
-
         generateCertificateId(user.id, propertyId, propCode)
-            .then(data => {
-                setCertData(data);
-                setCryptoLoading(false);
-            })
+            .then(data => { setCertData(data); setCryptoLoading(false); })
             .catch(() => {
-                // Fallback: simple deterministic ID if crypto fails
-                const fallback = `PROPX-${propCode}-${user.id.slice(-4).toUpperCase()}`;
+                const fallback = `PROPX-${(property.id.split('-')[1] || 'PROP').toUpperCase()}-${user.id.slice(-4).toUpperCase()}`;
                 setCertData({ certId: fallback, sigHex: '----', publicKeyHex: '---' });
                 setCryptoLoading(false);
             });
@@ -50,31 +45,77 @@ export default function Certificate() {
 
     const ownershipPercent = ((holding.shares / property.totalShares) * 100).toFixed(6);
     const issueDate = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
-
-    const handlePrint = () => window.print();
-
     const sealCode = certData ? formatSealCode(certData.sigHex) : '--------';
+
+    const handleDownloadPDF = async () => {
+        if (!certRef.current || downloading) return;
+        setDownloading(true);
+        try {
+            const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+                import('html2canvas'),
+                import('jspdf'),
+            ]);
+
+            const canvas = await html2canvas(certRef.current, {
+                scale: 3,           // high-res
+                useCORS: true,
+                backgroundColor: '#0a0f1e',
+                logging: false,
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4',
+            });
+
+            const pageW = pdf.internal.pageSize.getWidth();
+            const pageH = pdf.internal.pageSize.getHeight();
+
+            // Maintain aspect ratio, centred with 10 mm margin
+            const margin = 10;
+            const maxW = pageW - margin * 2;
+            const ratio = canvas.height / canvas.width;
+            const imgW = maxW;
+            const imgH = imgW * ratio;
+            const yOffset = (pageH - imgH) / 2;
+
+            pdf.addImage(imgData, 'PNG', margin, Math.max(margin, yOffset), imgW, imgH);
+            pdf.save(`PropickX_Certificate_${certData?.certId || propertyId}.pdf`);
+        } catch (err) {
+            console.error('PDF generation failed:', err);
+        } finally {
+            setDownloading(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-background pt-20 pb-12 px-4">
             <div className="max-w-3xl mx-auto">
-                {/* Back + Print */}
+
+                {/* Actions bar */}
                 <div className="flex justify-between items-center mb-6 print:hidden">
                     <Link to="/dashboard" className="flex items-center gap-2 text-text-secondary hover:text-primary transition-colors">
                         <ArrowLeft className="h-4 w-4" /> Back to Dashboard
                     </Link>
                     <button
-                        onClick={handlePrint}
-                        className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-accent transition-colors font-medium"
+                        onClick={handleDownloadPDF}
+                        disabled={downloading || cryptoLoading}
+                        className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl hover:bg-accent transition-all font-semibold shadow-lg shadow-primary/30 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                        <Printer className="h-4 w-4" /> Print / Download
+                        {downloading
+                            ? <><Loader2 className="h-4 w-4 animate-spin" /> Generating PDF…</>
+                            : <><Download className="h-4 w-4" /> Download Certificate</>
+                        }
                     </button>
                 </div>
 
-                {/* Certificate */}
+                {/* ── Certificate card (this is what gets rendered into the PDF) ── */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
+                    ref={certRef}
                     className="relative bg-gradient-to-br from-[#0f1623] to-[#12082a] rounded-3xl p-1 shadow-2xl"
                 >
                     {/* Gradient border */}
@@ -110,10 +151,7 @@ export default function Certificate() {
                             </div>
                         </div>
 
-                        {/* Certifies Text */}
-                        <p className="text-center text-text-secondary mb-8 text-sm">
-                            This certifies that
-                        </p>
+                        <p className="text-center text-text-secondary mb-8 text-sm">This certifies that</p>
 
                         {/* Investor Name */}
                         <div className="text-center mb-8 pb-4 border-b border-white/10">
@@ -123,11 +161,9 @@ export default function Certificate() {
                             <p className="text-text-secondary text-sm mt-1">{user?.email}</p>
                         </div>
 
-                        {/* Ownership Info */}
-                        <p className="text-center text-text-secondary mb-8">
-                            is the registered owner of
-                        </p>
+                        <p className="text-center text-text-secondary mb-8">is the registered owner of</p>
 
+                        {/* Property block */}
                         <div className="bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 rounded-2xl p-6 mb-8 text-center">
                             <p className="text-5xl font-black text-primary mb-1" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
                                 {holding.shares.toFixed(4)}
@@ -151,17 +187,16 @@ export default function Certificate() {
                             </div>
                         </div>
 
-                        {/* Certificate Details — with encrypted ID */}
+                        {/* Certificate ID + Date */}
                         <div className="grid grid-cols-2 gap-4 mb-6">
                             <div className="flex items-start gap-3">
                                 <Hash className="h-4 w-4 text-primary mt-1 flex-shrink-0" />
                                 <div>
                                     <p className="text-xs text-text-secondary">Certificate ID</p>
-                                    {cryptoLoading ? (
-                                        <div className="h-4 w-32 bg-white/10 rounded animate-pulse mt-1" />
-                                    ) : (
-                                        <p className="font-mono text-sm text-white tracking-wider">{certData?.certId}</p>
-                                    )}
+                                    {cryptoLoading
+                                        ? <div className="h-4 w-32 bg-white/10 rounded animate-pulse mt-1" />
+                                        : <p className="font-mono text-sm text-white tracking-wider">{certData?.certId}</p>
+                                    }
                                 </div>
                             </div>
                             <div className="flex items-start gap-3">
@@ -173,33 +208,31 @@ export default function Certificate() {
                             </div>
                         </div>
 
-                        {/* Crypto integrity block */}
+                        {/* Crypto integrity strip */}
                         <div className="bg-white/[0.03] border border-white/10 rounded-xl p-4 mb-8 grid grid-cols-2 gap-3">
                             <div className="flex items-start gap-2">
                                 <Lock className="h-3.5 w-3.5 text-secondary mt-0.5 flex-shrink-0" />
                                 <div>
                                     <p className="text-[10px] text-text-secondary uppercase tracking-wider">AES-256-GCM Seal</p>
-                                    {cryptoLoading ? (
-                                        <div className="h-3 w-28 bg-white/10 rounded animate-pulse mt-1" />
-                                    ) : (
-                                        <p className="font-mono text-xs text-secondary">{sealCode}</p>
-                                    )}
+                                    {cryptoLoading
+                                        ? <div className="h-3 w-28 bg-white/10 rounded animate-pulse mt-1" />
+                                        : <p className="font-mono text-xs text-secondary">{sealCode}</p>
+                                    }
                                 </div>
                             </div>
                             <div className="flex items-start gap-2">
                                 <KeyRound className="h-3.5 w-3.5 text-primary mt-0.5 flex-shrink-0" />
                                 <div>
                                     <p className="text-[10px] text-text-secondary uppercase tracking-wider">RSA-2048 Key Fingerprint</p>
-                                    {cryptoLoading ? (
-                                        <div className="h-3 w-28 bg-white/10 rounded animate-pulse mt-1" />
-                                    ) : (
-                                        <p className="font-mono text-xs text-primary">{certData?.publicKeyHex}</p>
-                                    )}
+                                    {cryptoLoading
+                                        ? <div className="h-3 w-28 bg-white/10 rounded animate-pulse mt-1" />
+                                        : <p className="font-mono text-xs text-primary">{certData?.publicKeyHex}</p>
+                                    }
                                 </div>
                             </div>
                         </div>
 
-                        {/* Seal */}
+                        {/* Footer seal */}
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <ShieldCheck className="h-5 w-5 text-secondary" />
@@ -214,16 +247,16 @@ export default function Certificate() {
                     </div>
                 </motion.div>
 
-                {/* Encryption Info Badge */}
-                <motion.div
+                {/* Info badge */}
+                <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3 }}
-                    className="mt-4 flex items-center justify-center gap-3 text-xs text-text-secondary print:hidden"
+                    className="mt-4 text-center text-xs text-text-secondary print:hidden"
                 >
-                    <Lock className="h-3 w-3" />
-                    <span>Certificate ID encrypted with <strong className="text-white">AES-256-GCM</strong> · Signed with <strong className="text-white">RSA-PSS 2048-bit</strong> · Unique per investor</span>
-                </motion.div>
+                    <Lock className="h-3 w-3 inline mr-1" />
+                    Encrypted with <strong className="text-white">AES-256-GCM</strong> · Signed with <strong className="text-white">RSA-PSS 2048-bit</strong> · Unique per investor
+                </motion.p>
             </div>
         </div>
     );
